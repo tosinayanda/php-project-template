@@ -1,0 +1,51 @@
+version: "3.7"
+
+services:
+
+  web:
+    image: nginx:alpine
+    ports:
+      - 80:80
+    volumes:
+      - ../src:/var/www/myapp
+      - ../src/config/site.conf:/var/www/etc/nginx/conf.d/site.conf
+    depends_on:
+      - php
+
+  php:
+    image: php:7.3-fpm
+    volumes:
+      - ../src:/var/www/myapp
+      - ../src/config/php.ini:/var/www/etc/php/php.ini
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+
+  # composer:
+  #   image: composer:1.9
+  #   command: ["composer", "install"]
+  #   volumes:
+  #     - ./src:/app
+
+  #===============#
+  # composer.test #
+  #===============#
+  composer:
+    image: composer/composer
+    # ports:
+    #   - "9001:9000"
+    volumes:
+      - .:/app
+    working_dir: /app    
+    # container_name: composer.test
+    command: install
+
+volumes:
+  redis-data:
